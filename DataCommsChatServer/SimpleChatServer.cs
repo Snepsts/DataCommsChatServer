@@ -38,25 +38,6 @@ class SimpleChatServer
 		return await Task.Run(() => Console.ReadLine());
 	}
 
-	private static string Filter(string filter)
-	{
-		string retvar = "";
-		bool firstRun = true;
-
-		for (int i = 0; i < filter.Length; i++)
-		{
-			if (filter[i] == '[' && !firstRun)
-				retvar += Environment.NewLine;
-
-			if (filter[i] == '[')
-				firstRun = false;
-
-			retvar += filter[i];
-		}
-
-		return retvar;
-	}
-
 	public static void Main(string[] args)
 	{
 		int recv;
@@ -108,6 +89,7 @@ class SimpleChatServer
 				string welcome = "Welcome to my test server";
 				data = Encoding.ASCII.GetBytes(welcome);
 				client.Send(data, data.Length, SocketFlags.None);
+				bool exit = false;
 
 				while (true)
 				{
@@ -120,23 +102,51 @@ class SimpleChatServer
 							Console.WriteLine();
 							data = new byte[1024];
 							recv = client.Receive(data);
-							if (recv == 0) //haven't received anything
+
+							if (recv == 0) //server non-reponsive
+							{
+								exit = true;
 								break;
-							//if we get here it means recv had some kind of message for us
+							}
+							
 							msg = Encoding.ASCII.GetString(data, 0, recv);
-							msg = Filter(msg);
+
+							if (msg == "exit")
+							{
+								string exitMsg = "Exit received, initiating disconnect.";
+								Console.WriteLine(exitMsg);
+								log.WriteLine(exitMsg);
+
+								exit = true;
+								break;
+							}
+
 							Console.WriteLine(msg);
 							log.WriteLine(msg);
 						}
 
 						System.Threading.Thread.Sleep(50); //Wait for .05 seconds before checking again
 					}
+
+					if (exit)
+						break;
 					//when the while loop finishes, we know we have something to send
 
 					input = T.Result;
 
 					if (input.Length == 0) //no input was been entered
 						continue;
+
+					if (input == "exit")
+					{
+						client.Send(Encoding.ASCII.GetBytes(input));
+						log.WriteLine(input);
+						string exitMsg = "Exit sent, initiating disconnect.";
+						Console.WriteLine(exitMsg);
+						log.WriteLine(exitMsg);
+
+						break;
+					}
 
 					currTime = DateTime.Now;
 					string prefix = "[" + currTime + "] server: "; //prepare our prefix to our message (time and name)

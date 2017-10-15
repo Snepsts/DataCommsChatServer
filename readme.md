@@ -19,7 +19,9 @@ to run this before running that one.
 		* i.e. DataCommsChatServer.exe 20003
 * Now you'll want to launch the client with the same port/application number as
 the server.
-* After you launch the client, you're good to receive messages!!!
-* You can exit by having the client exit and responding to the prompt with
-"yes".
-* A server log is written in C:\Public\Users\EchoServerLog.txt
+* After you launch the client, you're good to send and receive messages!!!
+* You can exit by either receiving an "exit" from the client or simply sending
+an "exit" yourself.
+	* To turn the server off, after the disconnect between server and client is
+	completed, just respond to the prompt with "yes".
+* A chat log is written in C:\Public\Users\ChatServerLog.txt
