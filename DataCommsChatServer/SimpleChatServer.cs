@@ -29,15 +29,41 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 class SimpleChatServer
 {
+	private static async Task<string> GetInputAsync() //method to grab input async (type while receiving messages)
+	{
+		return await Task.Run(() => Console.ReadLine());
+	}
+
+	private static string Filter(string filter)
+	{
+		string retvar = "";
+		bool firstRun = true;
+
+		for (int i = 0; i < filter.Length; i++)
+		{
+			if (filter[i] == '[' && !firstRun)
+				retvar += Environment.NewLine;
+
+			if (filter[i] == '[')
+				firstRun = false;
+
+			retvar += filter[i];
+		}
+
+		return retvar;
+	}
+
 	public static void Main(string[] args)
 	{
 		int recv;
 		byte[] data = new byte[1024];
+		string genMsg, input, msg;
 
-		if(args.Length > 1) // Test for correct # of args
+		if (args.Length > 1) // Test for correct # of args
 			throw new ArgumentException("Parameters: [<Port>]");
 
 		IPEndPoint ipep = new IPEndPoint(IPAddress.Any, Int32.Parse(args[0]));
@@ -46,18 +72,18 @@ class SimpleChatServer
 		server.Listen(10);
 
 		DateTime currTime = DateTime.Now;
-		string genMessage = "SimpleEchoServer log generated at: " + currTime + Environment.NewLine;
-		//System.IO.StreamWriter log = new System.IO.StreamWriter(@"C:\Users\Public\EchoServerLog.txt"); did not work, but for some reason the using statement does
-		using (System.IO.StreamWriter log = new System.IO.StreamWriter(@"C:\Users\Public\EchoServerLog.txt"))
+		genMsg = "SimpleChatServer log generated at: " + currTime + Environment.NewLine;
+		using (System.IO.StreamWriter log = new System.IO.StreamWriter(@"C:\Users\Public\ChatServerLog.txt"))
 		{
-			log.WriteLine(genMessage);
-			log.WriteLine(Environment.NewLine); //one more line to make it clear that the log starts below here
+			log.WriteLine(genMsg);
+			log.WriteLine(Environment.NewLine); //more lines to make it clear that the log starts below here
 
 			for (; ; )
 			{
 				string prompt = "Do you need to shut down server? Yes or No";
 				Console.WriteLine(prompt);
 				log.WriteLine(prompt);
+
 				string choice = Console.ReadLine();
 				log.WriteLine(choice);
 				if (choice.Contains("Y") || choice.Contains("y"))
@@ -65,39 +91,67 @@ class SimpleChatServer
 					string shutdownMsg = "The server is shutting down...";
 					Console.WriteLine(shutdownMsg);
 					log.WriteLine(shutdownMsg);
+
 					break;
 				}
+
 				string waitMsg = "Waiting for a client...";
 				Console.WriteLine(waitMsg);
 				log.WriteLine(waitMsg);
+
 				Socket client = server.Accept();
 				IPEndPoint clientep = (IPEndPoint)client.RemoteEndPoint;
 				string connectMsg = "Connected with " + clientep.Address + " at port " + clientep.Port;
 				Console.WriteLine(connectMsg);
 				log.WriteLine(connectMsg);
+
 				string welcome = "Welcome to my test server";
 				data = Encoding.ASCII.GetBytes(welcome);
 				client.Send(data, data.Length, SocketFlags.None);
 
 				while (true)
 				{
-					data = new byte[1024];
-					recv = client.Receive(data);
-					if (recv == 0)
-						break;
+					Task<string> T = GetInputAsync();
+
+					while (!T.IsCompleted) //waiting for input
+					{
+						if (client.Available > 0)
+						{
+							Console.WriteLine();
+							data = new byte[1024];
+							recv = client.Receive(data);
+							if (recv == 0) //haven't received anything
+								break;
+							//if we get here it means recv had some kind of message for us
+							msg = Encoding.ASCII.GetString(data, 0, recv);
+							msg = Filter(msg);
+							Console.WriteLine(msg);
+							log.WriteLine(msg);
+						}
+
+						System.Threading.Thread.Sleep(50); //Wait for .05 seconds before checking again
+					}
+					//when the while loop finishes, we know we have something to send
+
+					input = T.Result;
+
+					if (input.Length == 0) //no input was been entered
+						continue;
+
 					currTime = DateTime.Now;
-					string msg = "[" + currTime + "] client: " + Encoding.ASCII.GetString(data, 0, recv);
+					string prefix = "[" + currTime + "] server: "; //prepare our prefix to our message (time and name)
+					msg = prefix + input; //create message
+					client.Send(Encoding.ASCII.GetBytes(msg)); //send message
 					Console.WriteLine(msg);
-					log.WriteLine(msg);
-					client.Send(data, recv, SocketFlags.None);
+					log.WriteLine(msg); //record message
 				}
+
 				string disconnectMsg = "Disconnected from " + clientep.Address;
 				Console.WriteLine(disconnectMsg);
 				log.WriteLine(disconnectMsg);
 				client.Close();
 			}
 		}
-
 		server.Close();
 	}
 }
