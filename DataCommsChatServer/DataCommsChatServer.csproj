@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{94922559-FA84-4383-8B11-A2E5B9ABEFFB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>DataCommsEchoChatServer</RootNamespace>
-    <AssemblyName>DataCommsEchoChatServer</AssemblyName>
+    <RootNamespace>DataCommsChatServer</RootNamespace>
+    <AssemblyName>DataCommsChatServer</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
