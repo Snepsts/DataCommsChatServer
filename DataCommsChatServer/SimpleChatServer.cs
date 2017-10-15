@@ -52,6 +52,9 @@ class SimpleChatServer
 		server.Bind(ipep);
 		server.Listen(10);
 
+		Console.Write("Please enter a name: ");
+		string name = Console.ReadLine();
+
 		DateTime currTime = DateTime.Now;
 		genMsg = "SimpleChatServer log generated at: " + currTime + Environment.NewLine;
 		using (System.IO.StreamWriter log = new System.IO.StreamWriter(@"C:\Users\Public\ChatServerLog.txt"))
@@ -86,7 +89,7 @@ class SimpleChatServer
 				Console.WriteLine(connectMsg);
 				log.WriteLine(connectMsg);
 
-				string welcome = "Welcome to my test server";
+				string welcome = "Welcome to " + name + "'s server";
 				data = Encoding.ASCII.GetBytes(welcome);
 				client.Send(data, data.Length, SocketFlags.None);
 				bool exit = false;
@@ -149,7 +152,7 @@ class SimpleChatServer
 					}
 
 					currTime = DateTime.Now;
-					string prefix = "[" + currTime + "] server: "; //prepare our prefix to our message (time and name)
+					string prefix = "[" + currTime + "] " + name + ": "; //prepare our prefix to our message (time and name)
 					msg = prefix + input; //create message
 					client.Send(Encoding.ASCII.GetBytes(msg)); //send message
 					Console.WriteLine(msg);
