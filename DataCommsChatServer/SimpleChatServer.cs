@@ -1,20 +1,26 @@
 ﻿/******************************************************************************
-    SimpleEchoServer.cs - Simple TCP echo server using sockets
-
-  This program demonstrates the use of socket APIs to echo back the
-  client sentence.  The user interface is via a MS Dos window.
-
-  This program has been compiled and tested under Microsoft Visual Studio 2010.
+            SimpleEchoServer.cs - Simple TCP echo server using sockets
 
   Copyright 2012 by Ziping Liu for VS2010
+  Prepared for CS480, Southeast Missouri State University
+
+            SimpleChatServer.cs - Simple TCP chat server using sockets
+
+  This program demonstrates the use of socket APIs to chat with the client.
+  This includes sending and receiving/printing messages. The user interface is
+  via a MS Dos window.
+
+  This program has been compiled and tested under Microsoft Visual Studio 2017.
+
+  Copyright 2017 by Michael Ranciglio for VS2017
   Prepared for CS480, Southeast Missouri State University
 
 ******************************************************************************/
 /*-----------------------------------------------------------------------
  *
- * Program: SimpleEchoServer
- * Purpose: wait for a connection from an echo client and echo data
- * Usage:   SimpleEchoServer <portnum>
+ * Program: SimpleChatServer
+ * Purpose: wait for a connection from a chat client and send/receive data
+ * Usage:   SimpleChatServer <portnum>
  *
  *-----------------------------------------------------------------------
  */
@@ -24,7 +30,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-class SimpleEchoServer
+class SimpleChatServer
 {
 	public static void Main(string[] args)
 	{
